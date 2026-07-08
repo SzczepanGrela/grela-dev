@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Portfolio CV · Tiny dot variations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --display: "Inter Tight", system-ui, sans-serif;
+    --body:    "Inter Tight", system-ui, sans-serif;
+    --mono:    "JetBrains Mono", ui-monospace, monospace;
+
+    --bg:      oklch(0.16 0.005 250);
+    --bg-elev: oklch(0.195 0.006 250);
+    --fg:      oklch(0.96 0.005 250);
+    --fg-dim:  oklch(0.66 0.008 250);
+    --border:  oklch(0.28 0.006 250);
+    --accent:  oklch(0.78 0.16 142);
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--bg); color: var(--fg);
+    -webkit-font-smoothing: antialiased; overscroll-behavior: none; min-height: 100vh;
+  }
+
+  body[data-cursor-mode]:not([data-cursor-mode="native"]) { cursor: none; }
+  body[data-cursor-mode]:not([data-cursor-mode="native"]) a,
+  body[data-cursor-mode]:not([data-cursor-mode="native"]) button,
+  body[data-cursor-mode]:not([data-cursor-mode="native"]) input,
+  body[data-cursor-mode]:not([data-cursor-mode="native"]) textarea,
+  body[data-cursor-mode]:not([data-cursor-mode="native"]) [data-cursor] { cursor: none; }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr; min-height: 100vh; }
+
+  aside.picker {
+    position: sticky; top: 0; align-self: start; height: 100vh;
+    border-right: 1px solid var(--border);
+    background: var(--bg-elev);
+    padding: 32px 24px; overflow-y: auto; z-index: 2;
+  }
+  aside.picker h1 { font-family: var(--display); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 4px; }
+  aside.picker .sub {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--fg-dim); margin-bottom: 28px;
+  }
+  .picker-list { display: flex; flex-direction: column; gap: 6px; }
+  .picker-item {
+    text-align: left; background: transparent;
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; color: var(--fg); font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+    display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: center;
+  }
+  .picker-item:hover { border-color: var(--accent); }
+  .picker-item[data-active="true"] {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+  .picker-num { font-family: var(--mono); font-size: 11px; color: var(--fg-dim); letter-spacing: 0.08em; }
+  .picker-item[data-active="true"] .picker-num { color: var(--accent); }
+  .picker-name { font-size: 14px; letter-spacing: -0.005em; margin-bottom: 2px; }
+  .picker-desc { font-family: var(--mono); font-size: 10px; color: var(--fg-dim); letter-spacing: 0.04em; line-height: 1.4; }
+
+  main { padding: 80px 80px 120px; position: relative; }
+  .crumb {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim);
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+  }
+  .crumb .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  h2.heading {
+    font-family: var(--display);
+    font-size: clamp(48px, 6vw, 88px);
+    font-weight: 500; letter-spacing: -0.035em; line-height: 0.98;
+    margin: 0; color: var(--fg); text-wrap: balance; max-width: 1000px;
+  }
+  h2.heading .dim { color: var(--fg-dim); }
+  p.lede { margin-top: 28px; max-width: 640px; font-size: 18px; line-height: 1.55; color: var(--fg-dim); }
+
+  .cta-row { margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 22px; border-radius: 10px;
+    border: 1px solid var(--border); background: transparent; color: var(--fg);
+    text-decoration: none; font-size: 14px; font-family: inherit;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .cta:hover { border-color: var(--accent); color: var(--accent); }
+  .cta.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  .cards {
+    margin-top: 96px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    border: 1px solid var(--border); border-radius: 12px;
+    background: var(--bg-elev); padding: 24px; transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .y { font-family: var(--mono); font-size: 11px; color: var(--fg-dim); letter-spacing: 0.08em; }
+  .card h3 { font-family: var(--display); font-size: 22px; font-weight: 500; letter-spacing: -0.015em; margin: 12px 0 6px; }
+  .card p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--fg-dim); }
+
+  .text-block { margin-top: 96px; max-width: 720px; }
+  .text-block h3 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim); margin: 0 0 16px;
+  }
+  .text-block p { font-size: 17px; line-height: 1.65; color: var(--fg); margin: 0 0 16px; }
+  .text-block input {
+    width: 100%; box-sizing: border-box;
+    padding: 14px 18px; background: var(--bg-elev);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--fg); font-family: inherit; font-size: 15px; outline: none;
+  }
+  .text-block input:focus { border-color: var(--accent); }
+
+  .chips { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--border); background: transparent; color: var(--fg);
+    padding: 5px 10px; border-radius: 999px;
+    font-family: var(--mono); font-size: 11px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .spec {
+    margin-top: 96px; border-top: 1px solid var(--border); padding-top: 32px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px;
+  }
+  .spec dt { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 6px; }
+  .spec dd { margin: 0; font-size: 14px; line-height: 1.5; color: var(--fg); }
+
+  /* ============= Cursor layers — single dot ============= */
+  .cur-dot {
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    will-change: transform;
+    border-radius: 999px;
+    transition:
+      width 0.16s cubic-bezier(.2,.7,.3,1),
+      height 0.16s cubic-bezier(.2,.7,.3,1),
+      margin 0.16s cubic-bezier(.2,.7,.3,1),
+      background 0.15s,
+      border-color 0.15s,
+      border-width 0.15s,
+      border-radius 0.16s,
+      opacity 0.15s;
+  }
+  body[data-cursor-mode="native"] .cur-dot { display: none; }
+
+  /* defaults */
+  .cur-dot {
+    width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    background: var(--fg);
+    border: 0 solid transparent;
+  }
+
+  /* ----- A: 4 px micro ----- */
+  body[data-cursor-mode="micro"] .cur-dot {
+    width: 4px; height: 4px; margin: -2px 0 0 -2px;
+    background: var(--fg);
+  }
+  body[data-cursor-mode="micro"] .cur-dot[data-state="pointer"] {
+    width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    background: var(--fg);
+  }
+  body[data-cursor-mode="micro"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+  }
+
+  /* ----- B: 6 px standard, fg → accent on link ----- */
+  body[data-cursor-mode="standard"] .cur-dot { background: var(--fg); }
+  body[data-cursor-mode="standard"] .cur-dot[data-state="pointer"] { background: var(--accent); }
+  body[data-cursor-mode="standard"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+  }
+
+  /* ----- C: 6 px dim, brightens on link ----- */
+  body[data-cursor-mode="dim"] .cur-dot {
+    background: var(--fg-dim);
+  }
+  body[data-cursor-mode="dim"] .cur-dot[data-state="pointer"] {
+    width: 8px; height: 8px; margin: -4px 0 0 -4px;
+    background: var(--fg);
+  }
+  body[data-cursor-mode="dim"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+    background: var(--fg);
+  }
+
+  /* ----- D: 6 px filled → 12 px on link, scale-up ----- */
+  body[data-cursor-mode="grow"] .cur-dot { background: var(--fg); }
+  body[data-cursor-mode="grow"] .cur-dot[data-state="pointer"] {
+    width: 12px; height: 12px; margin: -6px 0 0 -6px;
+    background: var(--fg);
+  }
+  body[data-cursor-mode="grow"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+  }
+
+  /* ----- E: 6 px filled → 14 px hollow ring on link ----- */
+  body[data-cursor-mode="invert"] .cur-dot { background: var(--fg); }
+  body[data-cursor-mode="invert"] .cur-dot[data-state="pointer"] {
+    width: 14px; height: 14px; margin: -7px 0 0 -7px;
+    background: transparent;
+    border: 1px solid var(--fg);
+  }
+  body[data-cursor-mode="invert"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+    background: var(--fg);
+  }
+
+  /* ----- F: 5 px square (rounded 1 px) ----- */
+  body[data-cursor-mode="square"] .cur-dot {
+    width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px;
+    border-radius: 1px;
+    background: var(--fg);
+  }
+  body[data-cursor-mode="square"] .cur-dot[data-state="pointer"] {
+    width: 8px; height: 8px; margin: -4px 0 0 -4px;
+    background: var(--accent);
+  }
+  body[data-cursor-mode="square"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+    background: var(--fg);
+  }
+
+  /* ----- G: 6 px accent (always brand color) ----- */
+  body[data-cursor-mode="accent"] .cur-dot { background: var(--accent); }
+  body[data-cursor-mode="accent"] .cur-dot[data-state="pointer"] {
+    width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
+    background: var(--accent);
+  }
+  body[data-cursor-mode="accent"] .cur-dot[data-state="text"] {
+    width: 2px; height: 18px; margin: -9px 0 0 -1px; border-radius: 1px;
+    background: var(--accent);
+  }
+
+  @media (pointer: coarse) {
+    .layout { grid-template-columns: 1fr; }
+    aside.picker { position: relative; height: auto; }
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: oklch(0.30 0.006 250); border-radius: 999px; }
+</style>
+</head>
+<body data-cursor-mode="standard">
+
+<div class="layout">
+  <aside class="picker">
+    <h1>Tiny dot</h1>
+    <div class="sub">Variations</div>
+    <div class="picker-list" id="picker-list"></div>
+    <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--fg-dim); line-height: 1.6;">
+      All single-element. Each varies one decision: size, color, hover behavior, or shape.
+    </div>
+  </aside>
+
+  <main>
+    <div class="crumb">
+      <span class="dot"></span>
+      <span>Software engineer · Poland · Open to first commercial role</span>
+    </div>
+
+    <h2 class="heading">
+      I build <span class="dim">backends, pipelines, and the occasional UI.</span>
+    </h2>
+
+    <p class="lede">
+      Seven micro-variations of the tiny dot. Same restraint band, one variable changed each time.
+      Hover the cards, links and chips to feel the hover state.
+    </p>
+
+    <div class="cta-row">
+      <a href="#cards" class="cta primary">Selected work →</a>
+      <a href="#contact" class="cta">Get in touch</a>
+      <a href="#" class="cta">Download CV ↓</a>
+    </div>
+
+    <div class="cards" id="cards">
+      <article class="card">
+        <span class="y">2025</span>
+        <h3>SmakoszWebApp</h3>
+        <p>Restaurant & dish review platform with a Neural Collaborative Filtering recommender.</p>
+      </article>
+      <article class="card">
+        <span class="y">2025</span>
+        <h3>UrlShortenerSystem</h3>
+        <p>Distributed shortener with a separate analytics microservice — rate limiting, caching, load tests.</p>
+      </article>
+      <article class="card">
+        <span class="y">2024</span>
+        <h3>narzedzia-ai-pipeline</h3>
+        <p>Programmatic-SEO pipeline generating 500 landing pages per profession via Vertex AI.</p>
+      </article>
+      <article class="card">
+        <span class="y">2024</span>
+        <h3>AudioMaster</h3>
+        <p>Desktop audio processing app — pipeline architecture with chunked processing through ffmpeg.</p>
+      </article>
+    </div>
+
+    <div class="chips">
+      <button class="chip">C#</button>
+      <button class="chip">.NET</button>
+      <button class="chip">ASP.NET Core</button>
+      <button class="chip">Python</button>
+      <button class="chip">PyTorch</button>
+      <button class="chip">ONNX</button>
+      <button class="chip">Clean Architecture</button>
+      <button class="chip">CQRS</button>
+      <button class="chip">Docker</button>
+      <button class="chip">Grafana</button>
+      <button class="chip">Cloudflare R2</button>
+      <button class="chip">PostgreSQL</button>
+    </div>
+
+    <div class="text-block">
+      <h3>Text & inputs</h3>
+      <p>
+        Hover this paragraph. Click into the input below to test the text caret.
+      </p>
+      <input id="search" type="text" placeholder="Search projects, tags, technologies…" />
+    </div>
+
+    <dl class="spec" id="spec">
+      <div><dt>Variant</dt><dd id="spec-name">—</dd></div>
+      <div><dt>Default size</dt><dd id="spec-size">—</dd></div>
+      <div><dt>Hover behavior</dt><dd id="spec-hover">—</dd></div>
+      <div><dt>Notes</dt><dd id="spec-notes">—</dd></div>
+    </dl>
+  </main>
+</div>
+
+<div class="cur-dot" data-state="default"></div>
+
+<script>
+  const VARIANTS = [
+    { id: "native",   name: "Native",       desc: "OS default — baseline",       size: "—",   hover: "—",                                    notes: "Universal, zero brand expression." },
+    { id: "micro",    name: "A · Micro 4 px", desc: "Smaller default, grows to 6 px on link", size: "4 px", hover: "4 → 6 px",            notes: "Almost a punctuation mark. Disappears under text." },
+    { id: "standard", name: "B · Standard",  desc: "6 px fg, switches to accent on link", size: "6 px", hover: "fg → accent color",       notes: "Recommended baseline. Color does the talking." },
+    { id: "dim",      name: "C · Dim",       desc: "6 px fg-dim, brightens + grows on link", size: "6 px", hover: "dim → fg, 6 → 8 px", notes: "Cursor stays out of the way until you hover something interactive." },
+    { id: "grow",     name: "D · Grow",      desc: "Doubles in size on hover, no color change", size: "6 px", hover: "6 → 12 px",        notes: "Scale-only feedback. Monochrome." },
+    { id: "invert",   name: "E · Invert ring", desc: "Filled dot becomes a hollow ring on link", size: "6 px", hover: "Solid → 14 px ring", notes: "Switches between figure and frame. Calm but expressive." },
+    { id: "square",   name: "F · Square",    desc: "5 px square (1 px radius), accent on link", size: "5 px", hover: "5 → 8 px, accent",   notes: "Geometric, slightly more 'engineered' feel." },
+    { id: "accent",   name: "G · Accent",    desc: "Always brand color — grows slightly on link", size: "6 px", hover: "6 → 9 px",         notes: "Maximum brand presence. Reads less like a system cursor." },
+  ];
+
+  const body = document.body;
+  const list = document.getElementById("picker-list");
+  const dot  = document.querySelector(".cur-dot");
+
+  const specName  = document.getElementById("spec-name");
+  const specSize  = document.getElementById("spec-size");
+  const specHover = document.getElementById("spec-hover");
+  const specNotes = document.getElementById("spec-notes");
+
+  VARIANTS.forEach((v, i) => {
+    const el = document.createElement("button");
+    el.className = "picker-item";
+    el.dataset.id = v.id;
+    el.dataset.cursor = "pointer";
+    el.innerHTML = `
+      <span class="picker-num">${String(i).padStart(2, "0")}</span>
+      <span>
+        <div class="picker-name">${v.name}</div>
+        <div class="picker-desc">${v.desc}</div>
+      </span>`;
+    el.addEventListener("click", () => setVariant(v.id));
+    list.appendChild(el);
+  });
+
+  function setVariant(id) {
+    body.dataset.cursorMode = id;
+    [...list.children].forEach(c => c.dataset.active = String(c.dataset.id === id));
+    const v = VARIANTS.find(x => x.id === id);
+    specName.textContent  = v.name;
+    specSize.textContent  = v.size;
+    specHover.textContent = v.hover;
+    specNotes.textContent = v.notes;
+  }
+  setVariant("standard");
+
+  let mx = innerWidth / 2, my = innerHeight / 2;
+  function isPointer(t) {
+    return t && (t.matches?.("a, button, input, textarea, [data-cursor], .card, .chip, .picker-item, .cta") ||
+                 t.closest?.("a, button, input, textarea, [data-cursor], .card, .chip, .picker-item, .cta"));
+  }
+  function isText(t) { return t && t.matches?.("input, textarea"); }
+
+  document.addEventListener("mousemove", (e) => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = `translate(${mx}px, ${my}px)`;
+  });
+  document.addEventListener("mouseover", (e) => {
+    const t = e.target;
+    dot.dataset.state = isText(t) ? "text" : isPointer(t) ? "pointer" : "default";
+  });
+
+  if (matchMedia("(pointer: coarse)").matches) body.dataset.cursorMode = "native";
+</script>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Hero Explorations v2 — terminal × stats</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --display: "Inter Tight", system-ui, sans-serif;
+    --body:    "Inter Tight", system-ui, sans-serif;
+    --mono:    "JetBrains Mono", ui-monospace, monospace;
+  }
+  [data-theme="dark"] {
+    --bg:          oklch(0.16 0.005 250);
+    --bg-elev:     oklch(0.195 0.006 250);
+    --fg:          oklch(0.96  0.005 250);
+    --fg-dim:      oklch(0.66  0.008 250);
+    --border:      oklch(0.28  0.006 250);
+    --accent:      oklch(0.78  0.16 142);
+  }
+  [data-theme="light"] {
+    --bg:          oklch(0.985 0.003 250);
+    --bg-elev:     oklch(0.965 0.004 250);
+    --fg:          oklch(0.18  0.008 250);
+    --fg-dim:      oklch(0.45  0.008 250);
+    --border:      oklch(0.86  0.006 250);
+    --accent:      oklch(0.58  0.16 142);
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: oklch(0.10 0.005 250);
+    color: oklch(0.96 0.005 250);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  .cv-artboard-root { background: var(--bg); color: var(--fg); min-height: 100%; font-family: var(--body); }
+  .cv-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 22px; border-radius: 10px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--fg); text-decoration: none;
+    font-size: 14px; letter-spacing: 0.01em;
+    transition: background .2s, color .2s, border-color .2s, transform .2s;
+  }
+  .cv-cta:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .cv-cta.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: oklch(0.30 0.006 250); border-radius: 999px; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="shared.jsx"></script>
+<script type="text/babel" src="hero-variants.jsx"></script>
+<script type="text/babel" src="hero-variants-v2.jsx"></script>
+
+<script type="text/babel">
+  function ArtboardShell({ id, children }) {
+    return (
+      <AppProvider>
+        <ArtboardScope id={id}>{children}</ArtboardScope>
+      </AppProvider>
+    );
+  }
+  function ArtboardScope({ id, children }) {
+    const { theme } = useApp();
+    return (
+      <div className="cv-artboard-root" data-theme={theme} data-screen-label={id}>
+        <TopBar artboardId={id} initials="SG" />
+        {children}
+      </div>
+    );
+  }
+  function HeroArtboard({ Comp, id }) {
+    return <ArtboardShell id={id}><Comp /></ArtboardShell>;
+  }
+
+  function App() {
+    return (
+      <>
+        <CustomCursor />
+        <DesignCanvas
+          title="Hero v2 — terminal × stats riffs"
+          subtitle="Six hybrids based on H2 (Terminal) and H3 (GitHub stats)."
+        >
+          <DCSection id="t-evolution" title="Terminal evolutions">
+            <DCArtboard id="T1" label="T1 — htop / system monitor" width={1600} height={900}>
+              <HeroArtboard Comp={HeroT1_Htop} id="T1 · htop" />
+            </DCArtboard>
+            <DCArtboard id="T2" label="T2 — git diff" width={1600} height={900}>
+              <HeroArtboard Comp={HeroT2_Diff} id="T2 · diff" />
+            </DCArtboard>
+            <DCArtboard id="T3" label="T3 — Hybrid: terminal + stats" width={1600} height={1000}>
+              <HeroArtboard Comp={HeroT3_TerminalStats} id="T3 · hybrid" />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="s-evolution" title="Stats evolutions">
+            <DCArtboard id="S1" label="S1 — Dashboard with sparklines" width={1600} height={1100}>
+              <HeroArtboard Comp={HeroS1_Dashboard} id="S1 · dashboard" />
+            </DCArtboard>
+            <DCArtboard id="S2" label="S2 — Repo timeline" width={1600} height={950}>
+              <HeroArtboard Comp={HeroS2_RepoTimeline} id="S2 · timeline" />
+            </DCArtboard>
+            <DCArtboard id="S3" label="S3 — Receipt / printout" width={1600} height={950}>
+              <HeroArtboard Comp={HeroS3_Receipt} id="S3 · receipt" />
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      </>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+</body>
+</html>

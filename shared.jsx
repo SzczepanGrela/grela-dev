@@ -133,9 +133,8 @@ function About() {
         display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80,
         marginTop: 40, maxWidth: 1100,
       }}>
-        <p style={{ fontSize: 22, lineHeight: 1.45, color: "var(--fg)", letterSpacing: "-0.005em", margin: 0, textWrap: "pretty" }}>
-          {t("section_about_body_1")}
-        </p>
+        <p style={{ fontSize: 22, lineHeight: 1.45, color: "var(--fg)", letterSpacing: "-0.005em", margin: 0, textWrap: "pretty" }}
+           dangerouslySetInnerHTML={{ __html: t("section_about_body_1") }} />
         <p style={{ fontSize: 16, lineHeight: 1.65, color: "var(--fg-dim)", margin: 0, textWrap: "pretty" }}>
           {t("section_about_body_2")}
         </p>
@@ -487,52 +486,34 @@ function NoResults() {
   );
 }
 
-// ---------- Custom cursor (subtle dot + ring follower) ----------
-function CustomCursor({ stageRef }) {
+// ---------- Custom cursor — Tiny dot · variant B (final) ----------
+// 6 px fg dot in default, switches to accent on interactive targets.
+// Becomes a 2 × 18 px caret in text inputs.
+function CustomCursor() {
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
     const dot = document.createElement("div");
-    const ring = document.createElement("div");
     dot.className = "cv-cursor-dot";
-    ring.className = "cv-cursor-ring";
-    document.body.append(dot, ring);
-
-    let x = window.innerWidth / 2, y = window.innerHeight / 2;
-    let rx = x, ry = y;
-    let raf;
+    dot.dataset.state = "default";
+    document.body.append(dot);
 
     const onMove = (e) => {
-      x = e.clientX; y = e.clientY;
-      dot.style.transform = `translate(${x}px, ${y}px)`;
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
     };
-    const tick = () => {
-      rx += (x - rx) * 0.18;
-      ry += (y - ry) * 0.18;
-      ring.style.transform = `translate(${rx}px, ${ry}px)`;
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-
     const onOver = (e) => {
-      const target = e.target.closest("[data-cursor], a, button, input, textarea");
-      if (!target) {
-        ring.dataset.state = "default";
-        return;
-      }
-      const c = target.dataset.cursor ||
-                ((target.matches("input, textarea")) ? "text" : "pointer");
-      ring.dataset.state = c;
+      const t = e.target;
+      if (t.closest?.("input, textarea")) dot.dataset.state = "text";
+      else if (t.closest?.("a, button, [data-cursor], .cv-cta, .cv-card, .cv-chip")) dot.dataset.state = "pointer";
+      else dot.dataset.state = "default";
     };
 
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseover", onOver);
-
     return () => {
-      cancelAnimationFrame(raf);
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
-      dot.remove(); ring.remove();
+      dot.remove();
     };
   }, []);
   return null;

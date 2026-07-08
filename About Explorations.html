@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Portfolio CV · About variations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --display: "Inter Tight", system-ui, sans-serif;
+    --body:    "Inter Tight", system-ui, sans-serif;
+    --mono:    "JetBrains Mono", ui-monospace, monospace;
+    --bg:      oklch(0.16 0.005 250);
+    --bg-elev: oklch(0.195 0.006 250);
+    --fg:      oklch(0.96 0.005 250);
+    --fg-dim:  oklch(0.66 0.008 250);
+    --border:  oklch(0.28 0.006 250);
+    --accent:  oklch(0.78 0.16 142);
+    --placeholder-a: oklch(0.20 0.005 250);
+    --placeholder-b: oklch(0.225 0.006 250);
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: oklch(0.10 0.005 250); color: var(--fg);
+    -webkit-font-smoothing: antialiased; min-height: 100vh;
+  }
+
+  @media (pointer: fine) {
+    body { cursor: none; }
+    a, button, [data-cursor] { cursor: none; }
+  }
+  .cv-cursor-dot {
+    position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99999;
+    will-change: transform;
+    width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    border-radius: 999px; background: var(--fg);
+    transition: background .15s;
+  }
+  .cv-cursor-dot[data-state="pointer"] { background: var(--accent); }
+
+  .canvas { padding: 48px 56px 120px; display: flex; flex-direction: column; gap: 56px; }
+  .canvas h1 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 28px; letter-spacing: -0.02em; margin: 0;
+  }
+  .crumb {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim); margin-bottom: 8px;
+  }
+
+  .grid { display: flex; flex-direction: column; gap: 56px; }
+
+  .ab {
+    border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    background: var(--bg); display: flex; flex-direction: column;
+  }
+  .ab-label {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--fg-dim); background: var(--bg-elev);
+  }
+  .ab-label .num { color: var(--accent); }
+
+  .frame { padding: 64px; }
+  .section-label {
+    display: flex; align-items: baseline; gap: 16px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim); margin-bottom: 40px;
+  }
+  .section-label .num { color: var(--accent); }
+  .section-label .rule { width: 24px; height: 1px; background: var(--border); }
+  .section-label .label { color: var(--fg); }
+
+  /* ============ V1: Two-column classic ============ */
+  .v1-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1100px; }
+  .v1-grid p:first-child {
+    font-size: 22px; line-height: 1.45; color: var(--fg);
+    letter-spacing: -0.005em; margin: 0; text-wrap: pretty;
+  }
+  .v1-grid p:last-child {
+    font-size: 16px; line-height: 1.65; color: var(--fg-dim);
+    margin: 0; text-wrap: pretty;
+  }
+  .v1-grid p .ac { color: var(--accent); }
+
+  /* ============ V2: Pull-quote editorial ============ */
+  .v2-wrap { max-width: 980px; }
+  .v2-wrap .quote {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(36px, 4.2vw, 56px); line-height: 1.05;
+    letter-spacing: -0.025em; color: var(--fg);
+    margin: 0 0 48px; text-wrap: balance; max-width: 14ch;
+  }
+  .v2-wrap .quote .dim { color: var(--fg-dim); }
+  .v2-wrap .body { display: grid; grid-template-columns: 240px 1fr; gap: 56px; align-items: start; }
+  .v2-wrap .meta {
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .v2-wrap .meta-row { display: flex; flex-direction: column; gap: 4px; }
+  .v2-wrap .meta-row dt {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--fg-dim);
+  }
+  .v2-wrap .meta-row dd { margin: 0; font-size: 14px; color: var(--fg); }
+  .v2-wrap .body p {
+    font-size: 16px; line-height: 1.65; color: var(--fg-dim);
+    margin: 0 0 16px; max-width: 580px;
+  }
+  .v2-wrap .body p .fg { color: var(--fg); }
+
+  /* ============ V3: Q&A interview ============ */
+  .v3-wrap { max-width: 880px; }
+  .v3-q {
+    padding: 28px 0; border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 200px 1fr; gap: 32px;
+    align-items: baseline;
+  }
+  .v3-q:last-child { border-bottom: 1px solid var(--border); }
+  .v3-q .q {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
+    color: var(--accent); text-transform: uppercase;
+  }
+  .v3-q .a {
+    font-size: 17px; line-height: 1.6; color: var(--fg); margin: 0;
+    text-wrap: pretty;
+  }
+  .v3-q .a .dim { color: var(--fg-dim); }
+
+  /* ============ V4: Timeline ============ */
+  .v4-wrap { max-width: 880px; }
+  .v4-intro {
+    font-size: 18px; line-height: 1.6; color: var(--fg);
+    margin: 0 0 56px; max-width: 620px; text-wrap: pretty;
+  }
+  .v4-row {
+    display: grid; grid-template-columns: 100px 1fr; gap: 32px;
+    padding: 22px 0; border-top: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .v4-row:last-child { border-bottom: 1px solid var(--border); }
+  .v4-row .y {
+    font-family: var(--mono); font-size: 13px; color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .v4-row .what { font-size: 16px; color: var(--fg); margin-bottom: 4px; }
+  .v4-row .desc { font-size: 13px; color: var(--fg-dim); line-height: 1.55; }
+
+  /* ============ V5: Spec sheet ============ */
+  .v5-wrap { max-width: 1080px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: start; }
+  .v5-prose p {
+    font-size: 16px; line-height: 1.65; color: var(--fg-dim); margin: 0 0 16px;
+    text-wrap: pretty;
+  }
+  .v5-prose p:first-child {
+    font-size: 22px; line-height: 1.45; color: var(--fg);
+    letter-spacing: -0.005em; margin-bottom: 24px;
+  }
+  .v5-prose .ac { color: var(--accent); }
+  .v5-spec {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px; background: var(--bg-elev);
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .v5-spec-row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 20px;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .v5-spec-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .v5-spec-row:first-child { padding-top: 0; }
+  .v5-spec-row dt {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--fg-dim);
+  }
+  .v5-spec-row dd { margin: 0; font-size: 14px; color: var(--fg); line-height: 1.5; }
+  .v5-spec-row dd .dim { color: var(--fg-dim); }
+  .v5-spec-row dd .ac { color: var(--accent); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: oklch(0.30 0.006 250); border-radius: 999px; }
+</style>
+</head>
+<body>
+
+<div class="cv-cursor-dot" data-state="default"></div>
+
+<div class="canvas">
+  <div>
+    <div class="crumb">Portfolio CV · About · Five directions</div>
+    <h1>About me — variations</h1>
+    <p style="color: var(--fg-dim); font-size: 14px; max-width: 640px; margin: 12px 0 0;">
+      All ~120 words. Same content reshaped: the precision-machinist past is the consistent hook because it makes you memorable.
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===== V1 — Two-column classic ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">01</span> · Two-column</span><span>Classic editorial — lead + supporting</span></div>
+      <div class="frame">
+        <div class="section-label">
+          <span class="num">03</span><span class="rule"></span><span class="label">About</span>
+        </div>
+        <div class="v1-grid">
+          <p>
+            I'm a CS graduate from Poland writing mostly C# and Python, with the curiosity to pick up whatever the next project needs. I started in 2018 with C and C++, but my first projects worth showing didn't land until <span class="ac">2023</span>.
+          </p>
+          <p>
+            Before code, I worked on the production line for jet-engine turbine blades — micrometre tolerances, written-down checks, no room for "looks fine." That habit stayed: I treat side projects like real products, with tests, monitoring, CI/CD, and a deployed instance. Now I'm looking for a first commercial role where the same care is the baseline, not the exception.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== V2 — Pull-quote editorial ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">02</span> · Pull-quote</span><span>One strong line, body underneath</span></div>
+      <div class="frame">
+        <div class="section-label">
+          <span class="num">03</span><span class="rule"></span><span class="label">About</span>
+        </div>
+        <div class="v2-wrap">
+          <h2 class="quote">
+            From <span class="dim">turbine blades</span> to <span class="dim">type systems.</span>
+          </h2>
+          <div class="body">
+            <dl class="meta">
+              <div class="meta-row"><dt>Based</dt><dd>Poland</dd></div>
+              <div class="meta-row"><dt>Coding since</dt><dd>2018 · C, C++</dd></div>
+              <div class="meta-row"><dt>Now writes</dt><dd>C#, Python</dd></div>
+              <div class="meta-row"><dt>Status</dt><dd>Open to first role</dd></div>
+            </dl>
+            <div>
+              <p>
+                <span class="fg">CS graduate, ex-machinist on a jet-engine turbine-blade line.</span>
+                Micrometre tolerances and written checklists trained the habit I bring into code: nothing gets called "done" until it's tested, deployed, and watched.
+              </p>
+              <p>
+                I started writing code in 2018 in C and C++, but my first projects worth a portfolio came in 2023. Today most of the work is C# and Python — comfortable enough on the frontend to ship the whole thing, and quick to pick up whatever the next project demands.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== V3 — Q&A interview ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">03</span> · Q&amp;A</span><span>Reads like an interview transcript</span></div>
+      <div class="frame">
+        <div class="section-label">
+          <span class="num">03</span><span class="rule"></span><span class="label">About</span>
+        </div>
+        <div class="v3-wrap">
+          <div class="v3-q">
+            <div class="q">Who are you?</div>
+            <p class="a">CS graduate based in Poland. Writes mostly <span class="dim">C# and Python</span>, started with C and C++ in 2018. First projects worth showing landed in 2023.</p>
+          </div>
+          <div class="v3-q">
+            <div class="q">Before code?</div>
+            <p class="a">Production line for <span class="dim">jet-engine turbine blades</span> — micrometre tolerances, written checks, nothing called "done" by feel. That habit moved into the code.</p>
+          </div>
+          <div class="v3-q">
+            <div class="q">How do you work?</div>
+            <p class="a">Side projects get treated like real products: tests, monitoring, CI/CD, a deployed instance. The list opposite is what survived that filter.</p>
+          </div>
+          <div class="v3-q">
+            <div class="q">What's next?</div>
+            <p class="a">First commercial role — backend, DevOps, or full-stack. Open to any stack; happy to learn what the team uses.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== V4 — Timeline ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">04</span> · Timeline</span><span>Chronological — non-linear path is the story</span></div>
+      <div class="frame">
+        <div class="section-label">
+          <span class="num">03</span><span class="rule"></span><span class="label">About</span>
+        </div>
+        <div class="v4-wrap">
+          <p class="v4-intro">
+            CS graduate from Poland. Wrote my first line of C in 2018, my first portfolio-worthy project in 2023. The years in between weren't wasted — I spent them on a turbine-blade line, where shipping something rough wasn't an option.
+          </p>
+          <div class="v4-row">
+            <div class="y">2018</div>
+            <div>
+              <div class="what">First lines of code</div>
+              <div class="desc">Self-taught — C, then C++. Mostly small experiments and exercises.</div>
+            </div>
+          </div>
+          <div class="v4-row">
+            <div class="y">2019 — 2022</div>
+            <div>
+              <div class="what">Production line, jet-engine turbine blades</div>
+              <div class="desc">Precision machining, micrometre tolerances, hand-signed quality checks. Where I picked up the habit of treating "almost right" as "wrong."</div>
+            </div>
+          </div>
+          <div class="v4-row">
+            <div class="y">2023</div>
+            <div>
+              <div class="what">First real projects</div>
+              <div class="desc">Switched to C# and Python. Started shipping things end-to-end — tests, deploys, monitoring.</div>
+            </div>
+          </div>
+          <div class="v4-row">
+            <div class="y">2025</div>
+            <div>
+              <div class="what">CS degree finished, looking for first commercial role</div>
+              <div class="desc">Backend, DevOps, full-stack — open to any stack the team needs.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== V5 — Spec sheet ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">05</span> · Spec sheet</span><span>Prose + structured side panel</span></div>
+      <div class="frame">
+        <div class="section-label">
+          <span class="num">03</span><span class="rule"></span><span class="label">About</span>
+        </div>
+        <div class="v5-wrap">
+          <div class="v5-prose">
+            <p>
+              CS graduate from Poland who likes systems with moving parts behind them — recommenders, distributed services, automation pipelines. Mostly <span class="ac">C#</span> and <span class="ac">Python</span> these days, with the curiosity to learn whatever the next project needs.
+            </p>
+            <p>
+              Before code, I worked on the production line for jet-engine turbine blades — micrometre tolerances, written-down checks, no room for "almost right." That habit moved into the way I work: tests, monitoring, CI/CD, and a deployed instance, even on side projects. Looking for a first commercial role where the same care is the baseline.
+            </p>
+          </div>
+          <dl class="v5-spec">
+            <div class="v5-spec-row"><dt>Based</dt><dd>Poland · open to relocation</dd></div>
+            <div class="v5-spec-row"><dt>Coding since</dt><dd>2018 <span class="dim">· C, C++</span></dd></div>
+            <div class="v5-spec-row"><dt>Now writes</dt><dd>C#, Python</dd></div>
+            <div class="v5-spec-row"><dt>Open to</dt><dd>Anything the team uses</dd></div>
+            <div class="v5-spec-row"><dt>Before code</dt><dd>Aerospace precision machining</dd></div>
+            <div class="v5-spec-row"><dt>Looking for</dt><dd><span class="ac">First commercial role</span></dd></div>
+            <div class="v5-spec-row"><dt>Roles</dt><dd>Backend · DevOps · Full-stack</dd></div>
+          </dl>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</div>
+
+<script>
+  const dot = document.querySelector(".cv-cursor-dot");
+  document.addEventListener("mousemove", (e) => {
+    dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  });
+  document.addEventListener("mouseover", (e) => {
+    const t = e.target;
+    dot.dataset.state = t.closest?.("a, button, [data-cursor]") ? "pointer" : "default";
+  });
+</script>
+
+</body>
+</html>

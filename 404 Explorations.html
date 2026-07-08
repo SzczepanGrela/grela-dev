@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Portfolio CV · 404 minimal variations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --display: "Inter Tight", system-ui, sans-serif;
+    --body:    "Inter Tight", system-ui, sans-serif;
+    --mono:    "JetBrains Mono", ui-monospace, monospace;
+
+    --bg:      oklch(0.16 0.005 250);
+    --bg-elev: oklch(0.195 0.006 250);
+    --fg:      oklch(0.96 0.005 250);
+    --fg-dim:  oklch(0.66 0.008 250);
+    --border:  oklch(0.28 0.006 250);
+    --accent:  oklch(0.78 0.16 142);
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: oklch(0.10 0.005 250); color: var(--fg);
+    -webkit-font-smoothing: antialiased; min-height: 100vh;
+  }
+
+  @media (pointer: fine) {
+    body { cursor: none; }
+    a, button, [data-cursor] { cursor: none; }
+  }
+  .cv-cursor-dot {
+    position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99999;
+    will-change: transform;
+    width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    border-radius: 999px; background: var(--fg);
+    transition: background .15s;
+  }
+  .cv-cursor-dot[data-state="pointer"] { background: var(--accent); }
+
+  .canvas { padding: 48px 56px 120px; display: flex; flex-direction: column; gap: 56px; }
+  .canvas h1 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 28px; letter-spacing: -0.02em; margin: 0;
+  }
+  .crumb {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim); margin-bottom: 8px;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 56px; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+
+  .ab {
+    border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    background: var(--bg); display: flex; flex-direction: column;
+  }
+  .ab-label {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--fg-dim); background: var(--bg-elev);
+  }
+  .ab-label .num { color: var(--accent); }
+  .ab-frame { height: 600px; position: relative; overflow: hidden; background: var(--bg); }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    padding: 16px 28px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--fg-dim);
+  }
+  .topbar .brand { display: flex; align-items: center; gap: 10px; color: var(--fg); }
+  .topbar .badge {
+    width: 22px; height: 22px; border-radius: 5px; background: var(--accent);
+    color: var(--bg); display: grid; place-items: center; font-weight: 700; font-size: 10px;
+  }
+  .topbar a { color: var(--fg-dim); text-decoration: none; margin-left: 14px; }
+
+  .content { flex: 1; }
+
+  /* shared minimal CTA — hairline, low-weight */
+  .link {
+    color: var(--fg); text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px; font-size: 14px;
+    transition: border-color .15s, color .15s;
+  }
+  .link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .links { display: flex; gap: 28px; flex-wrap: wrap; }
+
+  .meta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim);
+  }
+  .meta .ac { color: var(--accent); }
+
+  /* ============ A: Inline 404 ============ */
+  .a-body {
+    flex: 1; padding: 0 64px; display: flex; flex-direction: column;
+    justify-content: center; gap: 28px;
+  }
+  .a-body .head {
+    font-family: var(--display); font-weight: 500;
+    font-size: 32px; letter-spacing: -0.02em; line-height: 1.15;
+    margin: 0; max-width: 520px;
+  }
+  .a-body .head .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .a-body p { color: var(--fg-dim); font-size: 14px; line-height: 1.6; margin: 0; max-width: 440px; }
+
+  /* ============ B: Number-as-meta ============ */
+  .b-body {
+    flex: 1; padding: 0 64px; display: flex; flex-direction: column;
+    justify-content: center; gap: 28px;
+  }
+  .b-body .head {
+    font-family: var(--display); font-weight: 500;
+    font-size: 36px; letter-spacing: -0.022em; line-height: 1.1;
+    margin: 0; max-width: 480px;
+  }
+  .b-body p { color: var(--fg-dim); font-size: 14px; line-height: 1.6; margin: 0; max-width: 440px; }
+
+  /* ============ C: Centered single line ============ */
+  .c-body {
+    flex: 1; padding: 0 64px; display: flex; align-items: center; justify-content: center;
+  }
+  .c-stack { display: flex; flex-direction: column; gap: 20px; align-items: flex-start; max-width: 540px; }
+  .c-stack .head {
+    font-family: var(--display); font-weight: 500;
+    font-size: 28px; letter-spacing: -0.018em; line-height: 1.2;
+    margin: 0;
+  }
+  .c-stack .head .num { font-family: var(--mono); font-size: 14px; color: var(--accent); margin-right: 12px; vertical-align: 4px; letter-spacing: 0.04em; }
+  .c-stack p { color: var(--fg-dim); font-size: 14px; line-height: 1.6; margin: 0; }
+
+  /* ============ D: Slash-divided ============ */
+  .d-body {
+    flex: 1; padding: 0 64px; display: flex; flex-direction: column;
+    justify-content: center; gap: 28px;
+  }
+  .d-row {
+    display: flex; align-items: baseline; gap: 18px;
+    font-family: var(--display); font-weight: 500;
+    font-size: 28px; letter-spacing: -0.018em;
+  }
+  .d-row .slash { color: var(--border); font-weight: 400; }
+  .d-row .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .d-row .label { color: var(--fg); }
+  .d-body p { color: var(--fg-dim); font-size: 14px; line-height: 1.6; margin: 0; max-width: 440px; }
+
+  /* ============ E: Caption-only ============ */
+  .e-body {
+    flex: 1; padding: 0 64px; display: flex; flex-direction: column;
+    justify-content: center; gap: 24px;
+  }
+  .e-body .top { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--fg-dim); }
+  .e-body .top .ac { color: var(--accent); }
+  .e-body .head {
+    font-family: var(--display); font-weight: 500;
+    font-size: 30px; letter-spacing: -0.02em; line-height: 1.15;
+    margin: 0; max-width: 480px;
+  }
+  .e-body p { color: var(--fg-dim); font-size: 14px; line-height: 1.6; margin: 0; max-width: 440px; }
+
+  /* ============ F: Two-column key/value ============ */
+  .f-body {
+    flex: 1; padding: 0 64px; display: grid; grid-template-columns: 120px 1fr;
+    column-gap: 32px; row-gap: 14px;
+    align-content: center;
+  }
+  .f-body dt {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--fg-dim); padding-top: 4px;
+  }
+  .f-body dd {
+    margin: 0; font-size: 15px; color: var(--fg); line-height: 1.5;
+  }
+  .f-body dd.lead {
+    font-family: var(--display); font-size: 28px; font-weight: 500;
+    letter-spacing: -0.02em; line-height: 1.15;
+  }
+  .f-body dd .ac { color: var(--accent); }
+  .f-body dd a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--border); transition: color .15s, border-color .15s; }
+  .f-body dd a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="cv-cursor-dot" data-state="default"></div>
+
+<div class="canvas">
+  <div>
+    <div class="crumb">Portfolio CV · 404 · Minimal variations</div>
+    <h1>Six minimal directions</h1>
+    <p style="color: var(--fg-dim); font-size: 14px; max-width: 640px; margin: 12px 0 0;">
+      Same content, restraint band only. Big type is off the table; the difference between variants is how the "404" sits relative to the rest of the message.
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===== A: Inline 404 in copy ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">A</span> · Inline number</span><span>404 lives inside the sentence</span></div>
+      <div class="ab-frame"><div class="screen">
+        <div class="topbar">
+          <div class="brand"><span class="badge">MK</span><span>MK · Portfolio</span></div>
+          <div><a href="#">Work</a><a href="#">About</a><a href="#">Contact</a></div>
+        </div>
+        <div class="a-body content">
+          <div class="meta"><span class="ac">●</span>&nbsp; Error</div>
+          <h2 class="head"><span class="num">404</span> — that page isn't here.</h2>
+          <p>The link is broken or the page moved. Pick a working one.</p>
+          <div class="links">
+            <a class="link" href="#" data-cursor="pointer">Selected work →</a>
+            <a class="link" href="#" data-cursor="pointer">Home</a>
+            <a class="link" href="#" data-cursor="pointer">Contact</a>
+          </div>
+        </div>
+      </div></div>
+    </article>
+
+    <!-- ===== B: Tiny number above headline ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">B</span> · Number as kicker</span><span>Mono code above sentence-case headline</span></div>
+      <div class="ab-frame"><div class="screen">
+        <div class="topbar">
+          <div class="brand"><span class="badge">MK</span><span>MK · Portfolio</span></div>
+          <div><a href="#">Work</a><a href="#">About</a><a href="#">Contact</a></div>
+        </div>
+        <div class="b-body content">
+          <div class="meta"><span class="ac">404 · </span>Not found</div>
+          <h2 class="head">That page isn't here anymore.</h2>
+          <p>Probably moved, renamed, or never existed. Try one of these.</p>
+          <div class="links">
+            <a class="link" href="#" data-cursor="pointer">All projects</a>
+            <a class="link" href="#" data-cursor="pointer">Home</a>
+            <a class="link" href="#" data-cursor="pointer">Get in touch</a>
+          </div>
+        </div>
+      </div></div>
+    </article>
+
+    <!-- ===== C: Centered, super tight ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">C</span> · One line, centered</span><span>Maximally restrained</span></div>
+      <div class="ab-frame"><div class="screen">
+        <div class="topbar">
+          <div class="brand"><span class="badge">MK</span><span>MK · Portfolio</span></div>
+          <div><a href="#">Work</a><a href="#">About</a><a href="#">Contact</a></div>
+        </div>
+        <div class="c-body content">
+          <div class="c-stack">
+            <h2 class="head"><span class="num">404</span>Page not found.</h2>
+            <p>The route doesn't resolve. Pick something that does:</p>
+            <div class="links">
+              <a class="link" href="#" data-cursor="pointer">Work</a>
+              <a class="link" href="#" data-cursor="pointer">About</a>
+              <a class="link" href="#" data-cursor="pointer">Contact</a>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </article>
+
+    <!-- ===== D: Slash-divided directory style ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">D</span> · Slash-divided</span><span>Reads like a path</span></div>
+      <div class="ab-frame"><div class="screen">
+        <div class="topbar">
+          <div class="brand"><span class="badge">MK</span><span>MK · Portfolio</span></div>
+          <div><a href="#">Work</a><a href="#">About</a><a href="#">Contact</a></div>
+        </div>
+        <div class="d-body content">
+          <div class="d-row">
+            <span class="num">404</span>
+            <span class="slash">/</span>
+            <span class="label">Not found</span>
+          </div>
+          <p>That URL doesn't lead anywhere. Try these instead.</p>
+          <div class="links">
+            <a class="link" href="#" data-cursor="pointer">/work</a>
+            <a class="link" href="#" data-cursor="pointer">/about</a>
+            <a class="link" href="#" data-cursor="pointer">/contact</a>
+          </div>
+        </div>
+      </div></div>
+    </article>
+
+    <!-- ===== E: Caption-only ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">E</span> · Caption-only</span><span>404 demoted to footer mark</span></div>
+      <div class="ab-frame"><div class="screen">
+        <div class="topbar">
+          <div class="brand"><span class="badge">MK</span><span>MK · Portfolio</span></div>
+          <div><a href="#">Work</a><a href="#">About</a><a href="#">Contact</a></div>
+        </div>
+        <div class="e-body content">
+          <div class="top"><span class="ac">GET</span> /projects/quantum-coffee-maker · <span class="ac">404</span></div>
+          <h2 class="head">No page lives at this URL.</h2>
+          <p>Most likely a stale link. Here's where to go instead.</p>
+          <div class="links">
+            <a class="link" href="#" data-cursor="pointer">All projects</a>
+            <a class="link" href="#" data-cursor="pointer">Home</a>
+            <a class="link" href="#" data-cursor="pointer">Contact</a>
+          </div>
+        </div>
+      </div></div>
+    </article>
+
+    <!-- ===== F: Definition list ===== -->
+    <article class="ab">
+      <div class="ab-label"><span><span class="num">F</span> · Definition list</span><span>Status as data</span></div>
+      <div class="ab-frame"><div class="screen">
+        <div class="topbar">
+          <div class="brand"><span class="badge">MK</span><span>MK · Portfolio</span></div>
+          <div><a href="#">Work</a><a href="#">About</a><a href="#">Contact</a></div>
+        </div>
+        <dl class="f-body content">
+          <dt>Status</dt>
+          <dd><span class="ac">404</span> — Not found</dd>
+
+          <dt>Page</dt>
+          <dd class="lead">That page isn't here.</dd>
+
+          <dt>Try</dt>
+          <dd>
+            <a href="#" data-cursor="pointer">Selected work</a> ·
+            <a href="#" data-cursor="pointer">About</a> ·
+            <a href="#" data-cursor="pointer">Contact</a>
+          </dd>
+        </dl>
+      </div></div>
+    </article>
+
+  </div>
+</div>
+
+<script>
+  const dot = document.querySelector(".cv-cursor-dot");
+  document.addEventListener("mousemove", (e) => {
+    dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  });
+  document.addEventListener("mouseover", (e) => {
+    const t = e.target;
+    dot.dataset.state = t.closest?.("a, button, [data-cursor]") ? "pointer" : "default";
+  });
+</script>
+
+</body>
+</html>
