@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Portfolio CV — design canvas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --display: "Inter Tight", system-ui, sans-serif;
+    --body:    "Inter Tight", system-ui, sans-serif;
+    --mono:    "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  /* Theming uses scoped data-attr so each artboard can render independently */
+  [data-theme="dark"] {
+    --bg:          oklch(0.16 0.005 250);
+    --bg-elev:     oklch(0.195 0.006 250);
+    --fg:          oklch(0.96  0.005 250);
+    --fg-dim:      oklch(0.66  0.008 250);
+    --border:      oklch(0.28  0.006 250);
+    --accent:      oklch(0.78  0.16 142);
+    --placeholder-a: oklch(0.20 0.005 250);
+    --placeholder-b: oklch(0.225 0.006 250);
+  }
+  [data-theme="light"] {
+    --bg:          oklch(0.985 0.003 250);
+    --bg-elev:     oklch(0.965 0.004 250);
+    --fg:          oklch(0.18  0.008 250);
+    --fg-dim:      oklch(0.45  0.008 250);
+    --border:      oklch(0.86  0.006 250);
+    --accent:      oklch(0.58  0.16 142);
+    --placeholder-a: oklch(0.93 0.005 250);
+    --placeholder-b: oklch(0.90 0.005 250);
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: oklch(0.10 0.005 250);
+    color: oklch(0.96 0.005 250);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* Each artboard becomes a themed scope */
+  .cv-artboard-root {
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100%;
+    font-family: var(--body);
+  }
+
+  /* CTA buttons used in hero */
+  .cv-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 22px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .cv-cta:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .cv-cta.primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .cv-cta.primary:hover { color: var(--bg); filter: brightness(1.05); }
+
+  /* Custom cursor */
+  @media (pointer: fine) {
+    body { cursor: none; }
+    a, button, input, textarea, [data-cursor] { cursor: none; }
+  }
+  .cv-cursor-dot, .cv-cursor-ring {
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    will-change: transform;
+  }
+  .cv-cursor-dot {
+    width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    border-radius: 999px;
+    background: oklch(0.78 0.16 142);
+    transition: opacity 0.15s, transform 0.05s;
+  }
+  .cv-cursor-ring {
+    width: 28px; height: 28px; margin: -14px 0 0 -14px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, oklch(0.96 0.005 250) 60%, transparent);
+    transition: width 0.18s, height 0.18s, margin 0.18s, background 0.18s, border-color 0.18s, opacity 0.18s;
+  }
+  .cv-cursor-ring[data-state="pointer"] {
+    width: 44px; height: 44px; margin: -22px 0 0 -22px;
+    border-color: oklch(0.78 0.16 142);
+    background: color-mix(in oklab, oklch(0.78 0.16 142) 12%, transparent);
+  }
+  .cv-cursor-ring[data-state="text"] {
+    width: 4px; height: 24px; margin: -12px 0 0 -2px;
+    border-radius: 2px;
+    background: oklch(0.78 0.16 142);
+    border-color: transparent;
+  }
+
+  /* design-canvas tweaks: hide outer chrome we don't need */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.30 0.006 250);
+    border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="shared.jsx"></script>
+<script type="text/babel" src="filters.jsx"></script>
+<script type="text/babel" src="thumbs.jsx"></script>
+<script type="text/babel" src="variants.jsx"></script>
+<script type="text/babel" src="detail.jsx"></script>
+
+<script type="text/babel">
+  const { useEffect: useEf, useRef: useRf } = React;
+
+  // Each artboard is its own AppProvider so theme/lang toggles are independent.
+  function ArtboardShell({ id, children }) {
+    return (
+      <AppProvider>
+        <ArtboardScope id={id}>
+          {children}
+        </ArtboardScope>
+      </AppProvider>
+    );
+  }
+
+  function ArtboardScope({ id, children }) {
+    const { theme } = useApp();
+    return (
+      <div className="cv-artboard-root" data-theme={theme} data-screen-label={id}>
+        <TopBar artboardId={id} />
+        {children}
+      </div>
+    );
+  }
+
+  // Standalone artboard for thumbnail exploration: just the project mosaic
+  // (no other sections), with the locked-in C sidebar filter.
+  function MosaicOnly({ ThumbComp, id }) {
+    return (
+      <ArtboardShell id={id}>
+        <ProjectMosaic wrapWithSidebar={true} ThumbComp={ThumbComp} />
+      </ArtboardShell>
+    );
+  }
+
+  function DetailArtboard({ DetailComp, id }) {
+    return (
+      <ArtboardShell id={id}>
+        <DetailComp />
+      </ArtboardShell>
+    );
+  }
+
+  function App() {
+    return (
+      <>
+        <CustomCursor />
+        <DesignCanvas
+          title="Portfolio · CV — Project detail"
+          subtitle="Four directions for the per-project page. Reference project: SmakoszWebApp."
+        >
+          <DCSection id="detail" title="Project detail page — explorations">
+
+            <DCArtboard id="D1" label="1 — Editorial / blog with sticky TOC" width={1600} height={4200}>
+              <DetailArtboard DetailComp={DetailEditorial} id="1 · Editorial" />
+            </DCArtboard>
+
+            <DCArtboard id="D2" label="2 — Sticky split (case study)" width={1600} height={4200}>
+              <DetailArtboard DetailComp={DetailSplit} id="2 · Split" />
+            </DCArtboard>
+
+            <DCArtboard id="D3" label="3 — Notebook / dev log" width={1600} height={4200}>
+              <DetailArtboard DetailComp={DetailNotebook} id="3 · Notebook" />
+            </DCArtboard>
+
+            <DCArtboard id="D4" label="4 — Spec card + narrative" width={1600} height={4200}>
+              <DetailArtboard DetailComp={DetailSpec} id="4 · Spec" />
+            </DCArtboard>
+
+          </DCSection>
+
+          <DCSection id="full" title="Full portfolio (locked-in: sidebar filter, stripes)">
+            <DCArtboard id="full" label="Full landing page" width={1600} height={3600}>
+              <FullPortfolio variantProps={{ wrapWithSidebar: true, ThumbComp: ThumbStripes }} id="Full" />
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      </>
+    );
+  }
+
+  function FullPortfolio({ variantProps = {}, id }) {
+    return (
+      <ArtboardShell id={id}>
+        <Hero />
+        <ProjectMosaic {...variantProps} />
+        <Skills />
+        <About />
+        <Experience />
+        <Contact />
+      </ArtboardShell>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+</body>
+</html>
