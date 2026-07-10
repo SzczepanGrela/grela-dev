@@ -212,14 +212,19 @@ function FilterSidebar({ filter, children }) {
                 <div style={{ display: "flex", flexDirection: "column", paddingBottom: 6 }}>
                   {ids.map(id => {
                     const isActive = filter.active.has(id);
+                    const count = filter.tagCounts[id] || 0;
+                    const isDisabled = count === 0 && !isActive;
                     return (
-                      <button key={id} onClick={() => filter.toggle(id)} data-cursor="pointer" style={{
+                      <button key={id} onClick={() => filter.toggle(id)} disabled={isDisabled} data-cursor={isDisabled ? "default" : "pointer"} style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "5px 0 5px 18px",
                         background: "transparent", border: "none",
                         color: isActive ? "var(--accent)" : "var(--fg)",
                         fontFamily: "inherit", fontSize: 13,
-                        cursor: "pointer", textAlign: "left",
+                        cursor: isDisabled ? "not-allowed" : "pointer", textAlign: "left",
+                        opacity: isDisabled ? 0.3 : 1,
+                        pointerEvents: isDisabled ? "none" : "auto",
+                        transition: "opacity 0.15s",
                       }}>
                         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <span style={{
@@ -232,7 +237,7 @@ function FilterSidebar({ filter, children }) {
                           {window.TAGS[id].label}
                         </span>
                         <span style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--fg-dim)" }}>
-                          {filter.tagCounts[id]}
+                          {count}
                         </span>
                       </button>
                     );

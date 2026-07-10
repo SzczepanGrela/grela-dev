@@ -243,7 +243,7 @@ function ChangelogRow({ project, index }) {
 // 8-col grid; tile sizes vary by project importance/index
 // `FilterComp` selects which filter UI to use; `wrapWithSidebar` lets the
 // sidebar variant take over layout (filter on the left, mosaic on the right).
-function ProjectMosaic({ FilterComp = FilterGrouped, wrapWithSidebar = false, ThumbComp = null }) {
+function ProjectMosaic({ FilterComp = FilterGrouped, wrapWithSidebar = false, ThumbComp = null, onOpenDetail }) {
   const { t } = useApp();
   const filter = useProjectFilter();
 
@@ -286,7 +286,7 @@ function ProjectMosaic({ FilterComp = FilterGrouped, wrapWithSidebar = false, Th
                   const s = wrapWithSidebar
                     ? [{col:4,row:2},{col:2,row:2},{col:3,row:1},{col:3,row:1},{col:2,row:1},{col:4,row:1},{col:3,row:1},{col:3,row:1}][i % 8]
                     : SIZES[i % SIZES.length];
-                  return <MosaicTile key={p.id} project={p} size={s} hero={i === 0} ThumbComp={ThumbComp} />;
+                  return <MosaicTile key={p.id} project={p} size={s} hero={i === 0} ThumbComp={ThumbComp} onOpenDetail={onOpenDetail} />;
                 })}
               </div>
             )}
@@ -300,7 +300,7 @@ function ProjectMosaic({ FilterComp = FilterGrouped, wrapWithSidebar = false, Th
   );
 }
 
-function MosaicTile({ project, size, hero, ThumbComp }) {
+function MosaicTile({ project, size, hero, ThumbComp, onOpenDetail }) {
   const { lang, t } = useApp();
   const [hover, setHover] = useS1(false);
   const showThumb = !!ThumbComp && (hero || size.row === 2 || size.col >= 4);
@@ -310,13 +310,18 @@ function MosaicTile({ project, size, hero, ThumbComp }) {
     <article
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onClick={(e) => {
+        if (!e.target.closest("a, button")) {
+          onOpenDetail && onOpenDetail(project.id);
+        }
+      }}
       data-cursor="pointer"
       style={{
         gridColumn: `span ${size.col}`,
         gridRow: `span ${size.row}`,
         border: "1px solid var(--border)", borderRadius: 12,
         background: "var(--bg-elev)",
-        padding: hero ? 32 : 22,
+        padding: hero ? "40px 32px 36px" : "28px 24px 26px",
         position: "relative", overflow: "hidden",
         transition: "border-color 0.25s, background 0.25s",
         borderColor: hover ? "var(--accent)" : "var(--border)",
@@ -332,7 +337,7 @@ function MosaicTile({ project, size, hero, ThumbComp }) {
         }} />
       )}
 
-      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--fg-dim)" }}>
           {project.year}
         </span>
@@ -344,13 +349,13 @@ function MosaicTile({ project, size, hero, ThumbComp }) {
         fontFamily: "var(--display)",
         fontSize: hero ? 40 : (size.row === 2 ? 26 : 22),
         fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.1,
-        margin: "0 0 12px", color: "var(--fg)",
+        margin: "0 0 16px", color: "var(--fg)",
       }}>
         {project.name}
       </h3>
 
       {showThumb && (
-        <div style={{ position: "relative", marginBottom: 12 }}>
+        <div style={{ position: "relative", marginBottom: 16 }}>
           <ThumbComp project={project} height={thumbHeight} />
         </div>
       )}
@@ -359,7 +364,7 @@ function MosaicTile({ project, size, hero, ThumbComp }) {
         position: "relative",
         margin: 0,
         fontSize: hero ? 16 : 13,
-        lineHeight: 1.5,
+        lineHeight: 1.6,
         color: "var(--fg-dim)",
         textWrap: "pretty",
         display: "-webkit-box",
@@ -370,7 +375,7 @@ function MosaicTile({ project, size, hero, ThumbComp }) {
         {hero ? project.summary[lang] : project.blurb[lang]}
       </p>
 
-      <div style={{ position: "relative", marginTop: "auto", paddingTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ position: "relative", marginTop: "auto", paddingTop: 24, display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
           {project.tags.slice(0, hero ? 10 : 5).map(id => <TagChip key={id} id={id} small />)}
           {project.tags.length > (hero ? 10 : 5) && (

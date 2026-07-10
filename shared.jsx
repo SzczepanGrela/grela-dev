@@ -9,11 +9,24 @@ const AppCtx = createContext(null);
 function AppProvider({ children }) {
   const [theme, setTheme] = useState("dark");
   const [lang,  setLang]  = useState("en");
+  const [filterActive, setFilterActive] = useState(new Set());
+  const [filterQuery, setFilterQuery] = useState("");
 
   const t = useCallback((k) => (window.I18N[lang] && window.I18N[lang][k]) || k, [lang]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
   return (
-    <AppCtx.Provider value={{ theme, setTheme, lang, setLang, t }}>
+    <AppCtx.Provider value={{
+      theme, setTheme,
+      lang, setLang,
+      t,
+      filterActive, setFilterActive,
+      filterQuery, setFilterQuery
+    }}>
       {children}
     </AppCtx.Provider>
   );
@@ -75,22 +88,84 @@ function TopBar({ initials = "MK", artboardId }) {
 }
 
 // ---------- Hero ----------
+const ME = {
+  name: "Szczepan Grela",
+  initials: "SG",
+  github: "SzczepanGrela",
+  ghUrl: "https://github.com/SzczepanGrela",
+  role: { en: "Junior Software Engineer", pl: "Junior Software Engineer" },
+  status: { en: "Open to roles", pl: "Szukam pracy" },
+};
+
+function useGithubStats(handle) {
+  const [data, setData] = useState({ loading: true, mock: false, repos: 0, stars: 0, languages: [], top: null });
+  useEffect(() => {
+    let dead = false;
+    const mock = () => ({
+      loading: false, mock: true, repos: 16, stars: 0,
+      languages: [
+        { name: "C#", pct: 0.42 },
+        { name: "Python", pct: 0.35 },
+        { name: "Dart", pct: 0.08 },
+        { name: "JS", pct: 0.08 },
+        { name: "HTML", pct: 0.07 },
+      ],
+      top: { name: "SmakoszWebApp", desc: "NCF recommender · Clean Arch backend" },
+    });
+    (async () => {
+      try {
+        const r = await fetch(`https://api.github.com/users/${handle}/repos?per_page=100&sort=updated`);
+        if (!r.ok) throw new Error("rate-limited or 404");
+        const repos = await r.json();
+        if (dead) return;
+        const lang = {};
+        let stars = 0;
+        const publicRepos = repos.filter(p => !p.fork);
+        publicRepos.forEach(p => {
+          if (p.language) lang[p.language] = (lang[p.language] || 0) + 1;
+          stars += p.stargazers_count || 0;
+        });
+        const total = Object.values(lang).reduce((a, b) => a + b, 0) || 1;
+        const languages = Object.entries(lang)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 6)
+          .map(([name, n]) => ({ name, pct: n / total }));
+        const top = publicRepos.find(p => p.name === "SmakoszWebApp") || publicRepos[0];
+        setData({
+          loading: false, mock: false,
+          repos: publicRepos.length, stars,
+          languages,
+          top: top ? { name: top.name, desc: top.description || "" } : null,
+        });
+      } catch (e) {
+        if (!dead) setData(mock());
+      }
+    })();
+    return () => { dead = true; };
+  }, [handle]);
+  return data;
+}
+
 function Hero() {
   const { t, lang } = useApp();
+  const stats = useGithubStats(ME.github);
+
   return (
-    <section style={{ padding: "120px 64px 96px", borderBottom: "1px solid var(--border)" }}>
+    <section style={{ padding: "100px 64px 96px", borderBottom: "1px solid var(--border)" }}>
+      {/* 1. Kicker */}
       <div style={{
         fontFamily: "var(--mono)", fontSize: 12, letterSpacing: "0.16em",
         textTransform: "uppercase", color: "var(--accent)",
         display: "flex", alignItems: "center", gap: 12, marginBottom: 28,
       }}>
         <span style={{ width: 8, height: 8, borderRadius: 999, background: "var(--accent)", boxShadow: "0 0 16px var(--accent)" }} />
-        {t("hero_kicker")} · {lang === "en" ? "Poland" : "Polska"} · {t("hero_status")}
+        {lang === "en" ? "SZCZEPAN GRELA · JUNIOR SOFTWARE ENGINEER · OPEN TO ROLES" : "SZCZEPAN GRELA · JUNIOR SOFTWARE ENGINEER · SZUKAM PRACY"}
       </div>
 
+      {/* 2. Główny Tytuł */}
       <h1 style={{
         fontFamily: "var(--display)",
-        fontSize: "clamp(56px, 7vw, 112px)",
+        fontSize: "clamp(48px, 6vw, 80px)",
         lineHeight: 0.96,
         letterSpacing: "-0.035em",
         fontWeight: 500,
@@ -99,16 +174,99 @@ function Hero() {
         textWrap: "balance",
         maxWidth: 1100,
       }}>
-        {t("hero_title_a")} <span style={{ color: "var(--fg-dim)" }}>{t("hero_title_b")}</span>
+        {lang === "en" ? (
+          <>Backend & process automation. <span style={{ color: "var(--fg-dim)" }}>Practical ML/AI deployments.</span></>
+        ) : (
+          <>Backend i automatyzacja procesów. <span style={{ color: "var(--fg-dim)" }}>Praktyczne wdrożenia ML/AI.</span></>
+        )}
       </h1>
 
+      {/* 3. Opis bio */}
       <p style={{
-        marginTop: 36, maxWidth: 640,
-        fontSize: 18, lineHeight: 1.55,
+        marginTop: 28, maxWidth: 720,
+        fontSize: 17, lineHeight: 1.6,
         color: "var(--fg-dim)",
-      }}>{t("hero_sub")}</p>
+        textWrap: "pretty",
+      }}>
+        {lang === "en" ? (
+          <>I focus on backend and automation using <strong>C#/.NET</strong> and <strong>Python</strong>. I am also interested in the practical applications of machine learning (<strong>ML</strong>) and <strong>AI</strong> — training recommender models in PyTorch and deploying LLM pipelines. I care about stability and keep my code verified with tests, containerized with Docker, and monitored.</>
+        ) : (
+          <>Skupiam się na backendzie i automatyzacji w <strong>C#/.NET</strong> oraz <strong>Pythonie</strong>. Interesuję się także praktycznym zastosowaniem uczenia maszynowego (<strong>ML</strong>) i sztucznej inteligencji (<strong>AI</strong>) — od trenowania modeli rekomendacji w PyTorch po wdrażanie pipeline'ów LLM. Dbam o to, by kod działał stabilnie: piszę testy, konteneryzuję usługi w Dockerze i konfiguruję podstawowy monitoring.</>
+        )}
+      </p>
 
-      <div style={{ marginTop: 48, display: "flex", gap: 12, flexWrap: "wrap" }}>
+      {/* 4. Karta GitHub Live Stats */}
+      <div style={{
+        marginTop: 40,
+        padding: 24,
+        border: "1px solid var(--border)",
+        borderRadius: 10,
+        background: "var(--bg-elev)",
+        maxWidth: 800,
+        display: "flex",
+        flexDirection: "column",
+        gap: 20,
+      }}>
+        <div style={{
+          fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.12em",
+          textTransform: "uppercase", color: "var(--fg-dim)",
+          display: "flex", justifyContent: "space-between",
+        }}>
+          <span>github.com/{ME.github}</span>
+          {stats.mock && <span style={{ color: "var(--accent)" }}>· cached</span>}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {[
+            { k: lang === "en" ? "Public repos" : "Repozytoria", v: stats.loading ? "…" : stats.repos },
+            { k: lang === "en" ? "Top language" : "Główny język", v: stats.loading ? "…" : (stats.languages[0]?.name || "—") },
+            { k: "Status", v: lang === "en" ? "Open" : "Otwarty", accent: true },
+          ].map((s, i) => (
+            <div key={i} style={{ borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--fg-dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{s.k}</div>
+              <div style={{
+                fontFamily: "var(--display)", fontSize: 32, lineHeight: 1,
+                color: s.accent ? "var(--accent)" : "var(--fg)", letterSpacing: "-0.02em", marginTop: 4
+              }}>
+                {s.v}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div style={{
+            fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.12em",
+            textTransform: "uppercase", color: "var(--fg-dim)", marginBottom: 8,
+          }}>
+            {lang === "en" ? "Language mix" : "Rozkład języków"}
+          </div>
+          <div style={{ display: "flex", height: 8, borderRadius: 999, overflow: "hidden", background: "var(--bg)" }}>
+            {stats.languages.map((l, i) => (
+              <div key={i} title={`${l.name} ${(l.pct*100).toFixed(0)}%`} style={{
+                width: `${l.pct * 100}%`,
+                background: i === 0 ? "var(--accent)"
+                  : `color-mix(in oklab, var(--accent) ${Math.max(20, 100 - i*18)}%, var(--bg))`
+              }} />
+            ))}
+          </div>
+          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 14, fontFamily: "var(--mono)", fontSize: 11, color: "var(--fg-dim)" }}>
+            {stats.languages.slice(0, 5).map((l, i) => (
+              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: 999,
+                  background: i === 0 ? "var(--accent)"
+                    : `color-mix(in oklab, var(--accent) ${Math.max(20, 100 - i*18)}%, var(--bg))`
+                }} />
+                {l.name} <span style={{ opacity: 0.7 }}>{(l.pct*100).toFixed(0)}%</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. CTAs */}
+      <div style={{ marginTop: 40, display: "flex", gap: 12, flexWrap: "wrap" }}>
         <a href="#work" className="cv-cta primary" data-cursor="pointer">
           {t("nav_work")} →
         </a>
@@ -122,6 +280,7 @@ function Hero() {
     </section>
   );
 }
+
 
 // ---------- About ----------
 function About() {
@@ -144,33 +303,143 @@ function About() {
 }
 
 // ---------- Skills ----------
+const SKILLS_RICH = [
+  {
+    group: { en: "Backend",   pl: "Backend" },
+    items: [
+      { name: ".NET",             level: 5, years: 4, tag: "dotnet" },
+      { name: "ASP.NET Core",     level: 5, years: 3, tag: "aspnet" },
+      { name: "C#",               level: 5, years: 4, tag: "csharp" },
+      { name: "Python",           level: 4, years: 3, tag: "python" },
+      { name: "REST",             level: 5, years: 4, tag: "rest" },
+      { name: "Entity Framework", level: 4, years: 3, tag: "efcore" },
+      { name: "MediatR",          level: 4, years: 2, tag: "mediatr" },
+    ],
+  },
+  {
+    group: { en: "ML / Data",  pl: "ML / Dane" },
+    items: [
+      { name: "PyTorch",                 level: 4, years: 2, tag: "pytorch" },
+      { name: "ONNX",                    level: 3, years: 1, tag: "onnx" },
+      { name: "Vertex AI",               level: 3, years: 1, tag: "vertex" },
+      { name: "Collaborative Filtering", level: 4, years: 2, tag: "collab" },
+      { name: "Generative AI",           level: 3, years: 1, tag: "genai" },
+    ],
+  },
+  {
+    group: { en: "DevOps",     pl: "DevOps" },
+    items: [
+      { name: "Docker",         level: 4, years: 3, tag: "docker" },
+      { name: "GitHub Actions", level: 4, years: 2, tag: "gha" },
+      { name: "CI/CD",          level: 4, years: 2, tag: "cicd" },
+      { name: "Grafana",        level: 3, years: 1, tag: "grafana" },
+      { name: "Prometheus",     level: 3, years: 1, tag: "prometheus" },
+      { name: "GCP",            level: 3, years: 1, tag: "gcp" },
+    ],
+  },
+  {
+    group: { en: "Storage",    pl: "Bazy danych" },
+    items: [
+      { name: "PostgreSQL",   level: 4, years: 3, tag: "postgres" },
+      { name: "SQL",          level: 4, years: 4, tag: "sql" },
+      { name: "Cloudflare R2", level: 3, years: 1, tag: "r2" },
+    ],
+  },
+  {
+    group: { en: "Frontend",   pl: "Frontend" },
+    items: [
+      { name: "Blazor",     level: 3, years: 2, tag: "blazor" },
+      { name: "TypeScript", level: 3, years: 2, tag: "typescript" },
+      { name: "PyQt",       level: 3, years: 1, tag: "pyqt" },
+    ],
+  },
+  {
+    group: { en: "Practices", pl: "Praktyki" },
+    items: [
+      { name: "Clean Architecture", level: 5, years: 3, tag: "cleanArch" },
+      { name: "CQRS",               level: 4, years: 2, tag: "cqrs" },
+      { name: "Microservices",      level: 4, years: 2, tag: "microsvc" },
+      { name: "Unit Testing",       level: 4, years: 3, tag: "unitTest" },
+      { name: "Integration Testing",level: 4, years: 2, tag: "intTest" },
+      { name: "Load Testing",       level: 3, years: 1, tag: "loadTest" },
+    ],
+  },
+];
+
 function Skills() {
   const { t, lang } = useApp();
+  const filter = useProjectFilter();
+
+  const handleTagClick = (tag) => {
+    // Clear other filters for clean view
+    filter.clear();
+    // Activate the selected tag
+    filter.toggle(tag);
+    // Smooth scroll to the projects section
+    const el = document.getElementById("work");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section id="skills" style={{ padding: "96px 64px", borderBottom: "1px solid var(--border)" }}>
-      <SectionLabel num="02" label={t("section_skills")} />
+      <div style={{ display: "flex", alignItems: "baseline", gap: 16, fontFamily: "var(--mono)", fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--fg-dim)" }}>
+        <span style={{ color: "var(--accent)" }}>02</span>
+        <span style={{ width: 24, height: 1, background: "var(--border)" }} />
+        <span style={{ color: "var(--fg)" }}>{t("section_skills")}</span>
+      </div>
+
+      <h2 style={{
+        fontFamily: "var(--display)",
+        fontSize: "clamp(36px, 4.5vw, 64px)", fontWeight: 500,
+        letterSpacing: "-0.025em", lineHeight: 1.05,
+        margin: "32px 0 16px", maxWidth: 900, color: "var(--fg)",
+        textWrap: "balance",
+      }}>
+        {lang === "en" ? "Stack — by domain" : "Stack — wg domeny"}
+      </h2>
+      <p style={{
+        fontSize: 16, color: "var(--fg-dim)", margin: "0 0 48px",
+        maxWidth: 720, lineHeight: 1.55,
+      }}>
+        {lang === "en"
+          ? "Click any technology to filter the projects above."
+          : "Kliknij wybraną technologię, aby przefiltrować listę projektów powyżej."}
+      </p>
+
       <div style={{
         display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: 32, marginTop: 48,
+        gap: 32
       }}>
-        {window.SKILLS.map((g, i) => (
+        {SKILLS_RICH.map((g, i) => (
           <div key={i}>
             <div style={{
               fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.12em",
               textTransform: "uppercase", color: "var(--accent)", marginBottom: 16,
             }}>{g.group[lang]}</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {g.items.map((it, j) => (
-                <li key={j} style={{
-                  padding: "10px 0",
-                  borderTop: "1px solid var(--border)",
-                  fontSize: 15, color: "var(--fg)",
-                  display: "flex", justifyContent: "space-between",
-                }}>
-                  <span>{it}</span>
-                </li>
-              ))}
-            </ul>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {g.items.map((it, j) => {
+                const isSelected = filter.active.has(it.tag);
+                return (
+                  <button
+                    key={j}
+                    onClick={() => handleTagClick(it.tag)}
+                    data-cursor="pointer"
+                    style={{
+                      padding: "5px 10px", borderRadius: 999, border: "1px solid",
+                      borderColor: isSelected ? "var(--accent)" : "var(--border)",
+                      background: isSelected ? "var(--accent)" : "transparent",
+                      color: isSelected ? "var(--bg)" : "var(--fg)",
+                      fontFamily: "var(--mono)", fontSize: 11, cursor: "pointer",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    {it.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>
@@ -278,9 +547,7 @@ function SectionLabel({ num, label }) {
 
 // ---------- Project filter (search + tag chips, grouped by category) ----------
 function useProjectFilter() {
-  const { lang, t } = useApp();
-  const [query, setQuery] = useState("");
-  const [active, setActive] = useState(new Set());
+  const { lang, t, filterActive, setFilterActive, filterQuery, setFilterQuery } = useApp();
 
   const allTagIds = useMemo(() => {
     const set = new Set();
@@ -302,26 +569,21 @@ function useProjectFilter() {
     return out;
   }, [allTagIds]);
 
-  const tagCounts = useMemo(() => {
-    const c = {};
-    window.PROJECTS.forEach(p => p.tags.forEach(tg => { c[tg] = (c[tg]||0)+1; }));
-    return c;
-  }, []);
-
   const toggle = useCallback((id) => {
-    setActive(prev => {
+    setFilterActive(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  }, []);
-  const clear = useCallback(() => { setActive(new Set()); setQuery(""); }, []);
+  }, [setFilterActive]);
+
+  const clear = useCallback(() => { setFilterActive(new Set()); setFilterQuery(""); }, [setFilterActive, setFilterQuery]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = filterQuery.trim().toLowerCase();
     return window.PROJECTS.filter(p => {
       // tag match: every active tag must be present
-      for (const tg of active) if (!p.tags.includes(tg)) return false;
+      for (const tg of filterActive) if (!p.tags.includes(tg)) return false;
       if (!q) return true;
       const hay = [
         p.name,
@@ -331,9 +593,20 @@ function useProjectFilter() {
       ].join(" ").toLowerCase();
       return hay.includes(q);
     });
-  }, [query, active, lang]);
+  }, [filterQuery, filterActive, lang]);
 
-  return { query, setQuery, active, toggle, clear, tagsByCat, tagCounts, filtered };
+  const tagCounts = useMemo(() => {
+    const c = {};
+    allTagIds.forEach(id => { c[id] = 0; });
+    filtered.forEach(p => {
+      p.tags.forEach(tg => {
+        c[tg] = (c[tg] || 0) + 1;
+      });
+    });
+    return c;
+  }, [filtered, allTagIds]);
+
+  return { query: filterQuery, setQuery: setFilterQuery, active: filterActive, toggle, clear, tagsByCat, tagCounts, filtered };
 }
 
 function FilterBar({ filter, sticky = false }) {
@@ -412,18 +685,25 @@ function FilterBar({ filter, sticky = false }) {
 function TagChip({ id, active, onClick, count, small = false }) {
   const tag = window.TAGS[id];
   if (!tag) return null;
+  const isDisabled = count === 0 && !active;
   return (
-    <button onClick={onClick} data-cursor="pointer" style={{
-      border: "1px solid " + (active ? "var(--accent)" : "var(--border)"),
-      background: active ? "var(--accent)" : "transparent",
-      color: active ? "var(--bg)" : "var(--fg)",
-      padding: small ? "3px 8px" : "5px 10px",
-      borderRadius: 999,
-      fontFamily: "var(--mono)", fontSize: small ? 10 : 11,
-      letterSpacing: "0.02em",
-      cursor: "pointer",
-      transition: "background 0.15s, color 0.15s, border-color 0.15s",
-    }}>
+    <button
+      onClick={onClick}
+      disabled={isDisabled}
+      data-cursor={isDisabled ? "default" : "pointer"}
+      style={{
+        border: "1px solid " + (active ? "var(--accent)" : "var(--border)"),
+        background: active ? "var(--accent)" : "transparent",
+        color: active ? "var(--bg)" : "var(--fg)",
+        padding: small ? "3px 8px" : "5px 10px",
+        borderRadius: 999,
+        fontFamily: "var(--mono)", fontSize: small ? 10 : 11,
+        letterSpacing: "0.02em",
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        opacity: isDisabled ? 0.35 : 1,
+        pointerEvents: isDisabled ? "none" : "auto",
+        transition: "background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s",
+      }}>
       {tag.label}{count != null && !small ? <span style={{ opacity: 0.55, marginLeft: 6 }}>{count}</span> : null}
     </button>
   );
@@ -453,18 +733,36 @@ function StatusPill({ status }) {
 function ProjectLinks({ project }) {
   const { t } = useApp();
   const ls = [];
-  if (project.links.live) ls.push({ label: t("visit_site"), href: project.links.live, primary: true });
-  if (project.links.repo) ls.push({ label: t("view_repo"), href: project.links.repo });
+  
+  if (project.links.live && project.links.live !== "#") {
+    ls.push({ label: t("visit_site"), href: project.links.live, primary: true });
+  }
+  
+  const repoUrl = project.links.repo && project.links.repo !== "#"
+    ? project.links.repo
+    : (project.status === "private" ? null : `https://github.com/SzczepanGrela/${project.name}`);
+
+  if (repoUrl) {
+    ls.push({ label: "GitHub", href: repoUrl, target: "_blank", rel: "noopener noreferrer" });
+  }
+
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       {ls.map((l, i) => (
-        <a key={i} href={l.href} data-cursor="pointer" style={{
+        <a key={i} href={l.href} target={l.target} rel={l.rel} data-cursor="pointer" style={{
           fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.06em",
           textTransform: "uppercase",
           color: l.primary ? "var(--bg)" : "var(--fg)",
           background: l.primary ? "var(--accent)" : "transparent",
           border: "1px solid " + (l.primary ? "var(--accent)" : "var(--border)"),
-          padding: "6px 10px", borderRadius: 6, textDecoration: "none",
+          padding: "6px 10.5px", borderRadius: 6, textDecoration: "none",
+          transition: "all 0.2s",
+        }}
+        onMouseEnter={(e) => {
+          if (!l.primary) e.currentTarget.style.borderColor = "var(--fg)";
+        }}
+        onMouseLeave={(e) => {
+          if (!l.primary) e.currentTarget.style.borderColor = "var(--border)";
         }}>
           {l.label} →
         </a>
@@ -500,6 +798,12 @@ function CustomCursor() {
 
     const onMove = (e) => {
       dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      // Hide if very close to the edges to prevent sticking
+      if (e.clientX <= 2 || e.clientY <= 2 || e.clientX >= window.innerWidth - 2 || e.clientY >= window.innerHeight - 2) {
+        dot.style.opacity = "0";
+      } else {
+        dot.style.opacity = "1";
+      }
     };
     const onOver = (e) => {
       const t = e.target;
@@ -507,12 +811,40 @@ function CustomCursor() {
       else if (t.closest?.("a, button, [data-cursor], .cv-cta, .cv-card, .cv-chip")) dot.dataset.state = "pointer";
       else dot.dataset.state = "default";
     };
+    const onLeave = () => {
+      dot.style.opacity = "0";
+    };
+    const onEnter = () => {
+      dot.style.opacity = "1";
+    };
+    const onBlur = () => {
+      dot.style.opacity = "0";
+    };
+    const onFocus = () => {
+      dot.style.opacity = "1";
+    };
+    const onMouseOut = (e) => {
+      if (!e.relatedTarget && !e.toElement) {
+        dot.style.opacity = "0";
+      }
+    };
 
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseleave", onLeave);
+    document.addEventListener("mouseenter", onEnter);
+    document.addEventListener("mouseout", onMouseOut);
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focus", onFocus);
+
     return () => {
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseleave", onLeave);
+      document.removeEventListener("mouseenter", onEnter);
+      document.removeEventListener("mouseout", onMouseOut);
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
       dot.remove();
     };
   }, []);

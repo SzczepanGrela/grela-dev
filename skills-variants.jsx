@@ -732,6 +732,346 @@ function SkillsV6_Pivot() {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// V7 — Wariacja 1: Interaktywny Grid (Baseline + podświetlenie powiązanych projektów)
+// ─────────────────────────────────────────────────────────────
+function SkillsV7_Var1() {
+  const { t, lang } = useApp();
+  const [hoveredTag, setHoveredTag] = useSv(null);
+  const projects = (window.PROJECTS || []).filter(p => !p.placeholder);
+
+  return (
+    <section id="skills" style={{ padding: "96px 64px", borderBottom: "1px solid var(--border)" }}>
+      <SVHeader
+        num="02" label={t("section_skills")}
+        title={lang === "en" ? "Skills & Project Connections" : "Stack i powiązania z projektami"}
+        sub={lang === "en"
+          ? "Hover a technology to highlight which projects use it."
+          : "Najedź na technologię, aby podświetlić projekty, w których została użyta."}
+      />
+      
+      <div style={{
+        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+        gap: 32, marginBottom: 40
+      }} onMouseLeave={() => setHoveredTag(null)}>
+        {SKILLS_RICH.map((g, i) => (
+          <div key={i}>
+            <div style={{
+              fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "var(--accent)", marginBottom: 16,
+            }}>{g.group[lang]}</div>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {g.items.map((it, j) => {
+                const isHovered = hoveredTag === it.tag;
+                return (
+                  <li key={j}
+                      onMouseEnter={() => setHoveredTag(it.tag)}
+                      style={{
+                        padding: "10px 0",
+                        borderTop: "1px solid var(--border)",
+                        fontSize: 15,
+                        color: isHovered ? "var(--accent)" : "var(--fg)",
+                        cursor: "pointer",
+                        transition: "color 0.15s",
+                      }}>
+                    {it.name}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Connection Indicator card */}
+      <div style={{
+        padding: 20, border: "1px solid var(--border)", borderRadius: 10,
+        background: "var(--bg-elev)", display: "flex", gap: 24, alignItems: "center",
+        flexWrap: "wrap"
+      }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 11, textTransform: "uppercase", color: "var(--fg-dim)" }}>
+          {lang === "en" ? "Related projects:" : "Powiązane projekty:"}
+        </div>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {projects.map(p => {
+            const isRelated = hoveredTag ? p.tags.includes(hoveredTag) : true;
+            const repoUrl = p.links.repo && p.links.repo !== "#" 
+              ? p.links.repo 
+              : `https://github.com/SzczepanGrela/${p.name}`;
+            return (
+              <a key={p.id}
+                 href={repoUrl}
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 data-cursor="pointer"
+                 style={{
+                   textDecoration: "none",
+                   fontSize: 14, fontFamily: "var(--mono)",
+                   padding: "6px 12px", border: "1px solid var(--border)",
+                   borderRadius: 6,
+                   background: hoveredTag && isRelated ? "color-mix(in oklab, var(--accent) 15%, var(--bg))" : "transparent",
+                   color: hoveredTag ? (isRelated ? "var(--accent)" : "color-mix(in oklab, var(--fg) 20%, transparent)") : "var(--fg)",
+                   borderColor: hoveredTag && isRelated ? "var(--accent)" : "var(--border)",
+                   transition: "all 0.2s",
+                 }}>
+                {p.name} ↗
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// V8 — Wariacja 2: Klikalny Grid z filtrowaniem i podglądem na dole
+// ─────────────────────────────────────────────────────────────
+function SkillsV8_Var2() {
+  const { t, lang } = useApp();
+  const [selectedTag, setSelectedTag] = useSv(null);
+  const projects = (window.PROJECTS || []).filter(p => !p.placeholder);
+  const filteredProjects = selectedTag ? projects.filter(p => p.tags.includes(selectedTag)) : projects;
+
+  return (
+    <section id="skills" style={{ padding: "96px 64px", borderBottom: "1px solid var(--border)" }}>
+      <SVHeader
+        num="02" label={t("section_skills")}
+        title={lang === "en" ? "Interactive Stack (Filter projects)" : "Interaktywny Stack (Filtrowanie)"}
+        sub={lang === "en"
+          ? "Click a technology to filter projects using it. Active tag: " + (selectedTag || "None")
+          : "Kliknij technologię, aby przefiltrować projekty. Aktywny tag: " + (selectedTag || "Brak")}
+      />
+
+      <div style={{
+        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+        gap: 32, marginBottom: 40
+      }}>
+        {SKILLS_RICH.map((g, i) => (
+          <div key={i}>
+            <div style={{
+              fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "var(--accent)", marginBottom: 16,
+            }}>{g.group[lang]}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {g.items.map((it, j) => {
+                const isSelected = selectedTag === it.tag;
+                return (
+                  <button
+                    key={j}
+                    onClick={() => setSelectedTag(selectedTag === it.tag ? null : it.tag)}
+                    data-cursor="pointer"
+                    style={{
+                      padding: "5px 10px", borderRadius: 999, border: "1px solid",
+                      borderColor: isSelected ? "var(--accent)" : "var(--border)",
+                      background: isSelected ? "var(--accent)" : "transparent",
+                      color: isSelected ? "var(--bg)" : "var(--fg)",
+                      fontFamily: "var(--mono)", fontSize: 11, cursor: "pointer",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    {it.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Output Projects Preview */}
+      <div style={{
+        padding: 24, border: "1px solid var(--border)", borderRadius: 12,
+        background: "var(--bg-elev)",
+      }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--fg-dim)", marginBottom: 12, display: "flex", justifyContent: "space-between" }}>
+          <span>{lang === "en" ? "Filtered projects" : "Przefiltrowane projekty"}</span>
+          <span>{filteredProjects.length} {lang === "en" ? "found" : "znaleziono"}</span>
+        </div>
+        <div style={{ display: "grid", gap: 8 }}>
+          {filteredProjects.map(p => {
+            const repoUrl = p.links.repo && p.links.repo !== "#"
+              ? p.links.repo
+              : `https://github.com/SzczepanGrela/${p.name}`;
+            return (
+              <div key={p.id} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px",
+                border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg)",
+              }}>
+                <div>
+                  <span style={{ fontWeight: 500, marginRight: 12 }}>{p.name}</span>
+                  <span style={{ color: "var(--fg-dim)", fontSize: 13 }}>{p.summary[lang].slice(0, 80)}...</span>
+                </div>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <button data-cursor="pointer" style={{
+                    fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.06em",
+                    textTransform: "uppercase", color: "var(--fg)", background: "transparent",
+                    border: "1px solid var(--border)", borderRadius: 4, padding: "4px 8px",
+                    cursor: "pointer", transition: "all 0.2s"
+                  }}>
+                    Case Study
+                  </button>
+                  <a href={repoUrl} target="_blank" rel="noopener noreferrer" data-cursor="pointer" style={{
+                    fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.06em",
+                    textTransform: "uppercase", color: "var(--accent)", textDecoration: "none",
+                    border: "1px solid var(--accent)", borderRadius: 4, padding: "4px 8px",
+                    transition: "all 0.2s"
+                  }}>
+                    GitHub ↗
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// V9 — Wariacja 3: Clean Split z panelem bocznym szczegółów (z gwiazdkami i latami)
+// ─────────────────────────────────────────────────────────────
+function SkillsV9_Var3() {
+  const { t, lang } = useApp();
+  const [hoveredTag, setHoveredTag] = useSv(null);
+  
+  // Find current hovered details
+  const activeSkill = useMemoSv(() => {
+    if (!hoveredTag) return null;
+    for (const g of SKILLS_RICH) {
+      const found = g.items.find(it => it.tag === hoveredTag);
+      if (found) return { ...found, group: g.group[lang] };
+    }
+    return null;
+  }, [hoveredTag, lang]);
+
+  const projects = (window.PROJECTS || []).filter(p => !p.placeholder);
+  const relatedProjects = activeSkill ? projects.filter(p => p.tags.includes(activeSkill.tag)) : [];
+
+  return (
+    <section id="skills" style={{ padding: "96px 64px", borderBottom: "1px solid var(--border)" }}>
+      <SVHeader
+        num="02" label={t("section_skills")}
+        title={lang === "en" ? "Skills Directory & Detail" : "Szczegółowy katalog umiejętności"}
+        sub={lang === "en"
+          ? "Hover a skill to see experience details and projects."
+          : "Najedź na umiejętność, aby zobaczyć szczegóły doświadczenia i projekty."}
+      />
+
+      <div style={{
+        display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 64, alignItems: "start"
+      }} onMouseLeave={() => setHoveredTag(null)}>
+        {/* Left Column: Traditional groups of skills */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+          {SKILLS_RICH.map((g, i) => (
+            <div key={i} style={{ marginBottom: 16 }}>
+              <div style={{
+                fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.12em",
+                textTransform: "uppercase", color: "var(--accent)", marginBottom: 12,
+              }}>{g.group[lang]}</div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {g.items.map((it, j) => {
+                  const isHovered = hoveredTag === it.tag;
+                  return (
+                    <li key={j}
+                        onMouseEnter={() => setHoveredTag(it.tag)}
+                        style={{
+                          padding: "8px 0",
+                          borderTop: "1px solid var(--border)",
+                          fontSize: 14.5,
+                          color: isHovered ? "var(--accent)" : "var(--fg)",
+                          cursor: "pointer",
+                          display: "flex", justifyContent: "space-between",
+                          transition: "color 0.15s",
+                        }}>
+                      <span>{it.name}</span>
+                      <span style={{ fontFamily: "var(--mono)", fontSize: 11, opacity: 0.6 }}>
+                        {it.years} {lang === "en" ? "yrs" : "lata"}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Right Column: Detailed review card */}
+        <div style={{
+          position: "sticky", top: 80,
+          padding: 28, border: "1px solid var(--border)", borderRadius: 12,
+          background: "var(--bg-elev)",
+          minHeight: 280, display: "flex", flexDirection: "column", gap: 18
+        }}>
+          {activeSkill ? (
+            <>
+              <div>
+                <span style={{
+                  fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.1em",
+                  color: "var(--accent)", textTransform: "uppercase"
+                }}>{activeSkill.group}</span>
+                <h3 style={{
+                  fontFamily: "var(--display)", fontSize: 28, fontWeight: 500,
+                  margin: "4px 0 0", color: "var(--fg)", letterSpacing: "-0.015em"
+                }}>{activeSkill.name}</h3>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                <div>
+                  <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--fg-dim)", textTransform: "uppercase" }}>
+                    {lang === "en" ? "Years active" : "Okres używania"}
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4 }}>
+                    {activeSkill.years} {lang === "en" ? "years" : "lata"}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--fg-dim)", textTransform: "uppercase" }}>
+                    {lang === "en" ? "Skill Level" : "Poziom"}
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 500, marginTop: 4, color: "var(--accent)" }}>
+                    {"★".repeat(activeSkill.level)}{"☆".repeat(5 - activeSkill.level)}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--fg-dim)", textTransform: "uppercase", marginBottom: 8 }}>
+                  {lang === "en" ? "Used in projects" : "Użyte w projektach"}
+                </div>
+                {relatedProjects.length > 0 ? (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {relatedProjects.map(p => (
+                      <span key={p.id} style={{
+                        fontFamily: "var(--mono)", fontSize: 11, padding: "4px 8px",
+                        border: "1px solid var(--border)", borderRadius: 4, background: "var(--bg)",
+                        color: "var(--fg)"
+                      }}>{p.name}</span>
+                    ))}
+                  </div>
+                ) : (
+                  <span style={{ fontSize: 13, color: "var(--fg-dim)" }}>
+                    {lang === "en" ? "No case study project" : "Brak projektu z case study"}
+                  </span>
+                )}
+              </div>
+            </>
+          ) : (
+            <div style={{
+              flex: 1, display: "grid", placeItems: "center",
+              fontFamily: "var(--mono)", color: "var(--fg-dim)", fontSize: 13,
+              textAlign: "center", padding: "40px 0"
+            }}>
+              {lang === "en" ? "Hover any technology for details" : "Najedź na technologię po lewej, aby zobaczyć szczegóły"}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 Object.assign(window, {
   SkillsV0_Baseline,
   SkillsV1_Bars,
@@ -740,5 +1080,8 @@ Object.assign(window, {
   SkillsV4_Radar,
   SkillsV5_Terminal,
   SkillsV6_Pivot,
+  SkillsV7_Var1,
+  SkillsV8_Var2,
+  SkillsV9_Var3,
   SKILLS_RICH,
 });

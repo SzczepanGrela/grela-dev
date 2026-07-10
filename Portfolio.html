@@ -15,7 +15,7 @@
     --mono:    "JetBrains Mono", ui-monospace, monospace;
   }
 
-  [data-theme="dark"] {
+  [data-theme="dark"], html[data-theme="dark"] {
     --bg:          oklch(0.16 0.005 250);
     --bg-elev:     oklch(0.195 0.006 250);
     --fg:          oklch(0.96  0.005 250);
@@ -25,7 +25,7 @@
     --placeholder-a: oklch(0.20 0.005 250);
     --placeholder-b: oklch(0.225 0.006 250);
   }
-  [data-theme="light"] {
+  [data-theme="light"], html[data-theme="light"] {
     --bg:          oklch(0.985 0.003 250);
     --bg-elev:     oklch(0.965 0.004 250);
     --fg:          oklch(0.18  0.008 250);
@@ -37,6 +37,10 @@
   }
 
   html, body { margin: 0; padding: 0; }
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
   body {
     font-family: var(--body);
     background: var(--bg);
@@ -74,8 +78,8 @@
 
   /* Custom cursor — Tiny dot · B */
   @media (pointer: fine) {
-    body { cursor: none; }
-    a, button, input, textarea, [data-cursor] { cursor: none; }
+    body, html { cursor: none !important; }
+    a, button, input, textarea, label, select, [data-cursor], [role="button"] { cursor: none !important; }
   }
   .cv-cursor-dot {
     position: fixed; top: 0; left: 0;
@@ -90,7 +94,8 @@
       height 0.15s cubic-bezier(.2,.7,.3,1),
       margin 0.15s cubic-bezier(.2,.7,.3,1),
       background 0.15s,
-      border-radius 0.15s;
+      border-radius 0.15s,
+      opacity 0.15s;
   }
   .cv-cursor-dot[data-state="pointer"] {
     background: var(--accent);
@@ -100,11 +105,17 @@
     border-radius: 1px;
   }
 
+  * {
+    scrollbar-color: color-mix(in oklab, var(--accent) 45%, var(--border)) transparent;
+  }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.30 0.006 250);
+    background: color-mix(in oklab, var(--accent) 30%, var(--border));
     border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
   }
 
   /* Top-level navigation between landing and detail */
@@ -149,13 +160,40 @@
     const { theme } = useApp();
     // simple in-app router: "home" | "detail"
     const [page, setPage] = useS("home");
+    const [projectId, setProjectId] = useS("smakosz");
+
+    React.useEffect(() => {
+      const handleHash = () => {
+        const hash = window.location.hash;
+        if (hash.startsWith("#project-")) {
+          const id = hash.replace("#project-", "");
+          setProjectId(id);
+          setPage("detail");
+          window.scrollTo(0, 0);
+        } else {
+          setPage("home");
+        }
+      };
+
+      handleHash();
+      window.addEventListener("hashchange", handleHash);
+      return () => window.removeEventListener("hashchange", handleHash);
+    }, []);
+
+    const navigateToDetail = (id) => {
+      window.location.hash = `project-${id}`;
+    };
+
+    const navigateToHome = () => {
+      window.location.hash = "";
+    };
 
     return (
-      <div className="cv-root" data-theme={theme} data-screen-label={page === "home" ? "Landing" : "Project · SmakoszWebApp"}>
-        <TopBar artboardId={page === "home" ? "home" : "smakosz"} />
-        <PageSwitcher page={page} setPage={setPage} />
-        {page === "home"   && <Landing onOpenDetail={() => setPage("detail")} />}
-        {page === "detail" && <DetailSplit />}
+      <div className="cv-root" data-theme={theme} data-screen-label={page === "home" ? "Landing" : `Project · ${projectId}`}>
+        <TopBar artboardId={page === "home" ? "home" : projectId} />
+        <PageSwitcher page={page} setPage={(p) => { if (p === "home") navigateToHome(); else navigateToDetail(projectId); }} />
+        {page === "home"   && <Landing onOpenDetail={navigateToDetail} />}
+        {page === "detail" && <DetailSplit projectId={projectId} onBack={navigateToHome} />}
       </div>
     );
   }
@@ -183,7 +221,7 @@
       <>
         <Hero />
         <ProjectMosaic wrapWithSidebar={true} ThumbComp={ThumbStripes} onOpenDetail={onOpenDetail} />
-        <Skills />
+        <Skills onOpenDetail={onOpenDetail} />
         <About />
         <Experience />
         <Contact />
