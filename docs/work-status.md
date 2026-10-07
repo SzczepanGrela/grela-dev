@@ -4,6 +4,8 @@
 
 - **Repozytorium:** `SzczepanGrela/grela-dev`
 - **Gałąź bieżąca:** `feat/vite-foundation`
+- **HEAD commit:** `1bc899ae914d5bb234b043a3923564934a9537aa`
+- **Pull Request:** [#1 (feat: migrate Portfolio.html to Vite + React 18)](https://github.com/SzczepanGrela/grela-dev/pull/1)
 - **Baza (base revision):** `2b3e09330e50e6c291e5696a97ec8430d1ef2935` (`origin/main`)
 - **Stan wdrożenia (preview / produkcja):** **bez zmian** (nie uruchamiano wdrożenia produkcyjnego; Cloudflare Pages pozostaje w stanie nienaruszonym)
 - **Status etapu 1 (Vite + React Foundation):** **zaimplementowane** → **przetestowane** (oczekuje na przegląd koordynatora)
