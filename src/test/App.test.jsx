@@ -82,7 +82,7 @@ describe('App component', () => {
     });
 
     expect(await screen.findByText(/404 · Project not found/i)).toBeInTheDocument();
-    expect(screen.getByText(/"nonexistent-project"/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /nonexistent-project/i })).toBeInTheDocument();
 
     const returnBtn = screen.getByRole('button', { name: /← back to projects/i });
     fireEvent.click(returnBtn);
